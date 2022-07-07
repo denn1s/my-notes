@@ -1,0 +1,261 @@
+
+## C++
+
+- C++ es un lenguaje de proposito general
+- Fue creado como una extensión de C. Es básicamente C con clases.
+- 1985
+- C es el sucesor de B, nacio en 1972
+- Fue creado para construir utilidades de UNIX
+- Permite trabajar con progra orientada a objetos, pero permite tambien manipular la memoria a bajo nivel. 
+- A diferencia de lenguajes como python y javascript, no hay una mejor práctica. Simplemente tiene muchos años de experiencia. 
+- Algunas personas lo hacen de una manera, otras lo hacen de otra
+- No pueden venir y buscar en google la mejor manera.
+- Esta es mi manera de hacerlo. Es una de las maneras más comunes de cómo se trabaja en linux. 
+  - https://www.youtube.com/watch?v=gGxi500Q5uE
+- Hello world
+```
+#include <iostream>
+
+int main() {
+    std::cout << "Hello World!" << std::endl;
+    return 0;
+}
+```
+- Esto es un makefile
+```
+default:
+    g++ src/main.cpp -o a.out
+```
+- Sin embargo, para proyectos grandes hacer makefiles se llega a poner muy complejos.  
+- Esto es porque c++ maneja sus librerías de una manera un poco distinta a lo que quizá estén acostumbrados. Recuerden que este es el lenguaje para crear sistemas operativos por exelencia. 
+```
+$ ls /usr/lib
+```
+- Con el tiempo, se creo una utilidad que construye makefiles CMake
+- Creemos un folder para el src y un folder donde vamos a guardar el codigo compilado
+- No usen un solo folder. Alguna gente lo hace, pero es horrible. 
+- Todo esto les va a parecer muy familiar, en especial a los que tengan más experiencia con múltiples lenguajes. Esto va a pasar mucho mientras aprendamos más sobre C, porque C++ es la base de los lenguajes más modernos. Es como aprender latin.
+```
+$ nano CMakeLists.txt
+``` 
+```
+cmake_minimum_required(VERSION 3.23)
+
+project(SampleP VERSION 1.0)
+
+add_executable(SampleE src/main.cpp)
+``` 
+```
+$ cmake -S . -B build/
+```
+- Despues ya podemos ir al folder build, y hacer make
+- A primera vista se ve más complejo, pero a la larga ahorra un monton de tiempo.
+- Podemos crear scripts para que nos ayuden
+```
+$ nano configure.sh
+
+#! /bin/sh
+cmake -S . -B build
+```
+```
+$ nano build.sh
+
+#! /bin/sh
+
+cd build ; make
+``` 
+```
+$ nano run.sh
+
+#! /bin/sh
+
+./configure.sh ; ./build.sh ; ./build/SampleE
+``` 
+```
+$ nano clean.sh
+
+#! /bin/sh
+
+rm -rf build ; mkdir build
+``` 
+- Hagamos una librería
+```
+$ mkdir Math
+$ touch math.cpp
+$ touch math.h
+```
+- Recuerden que en C++, se agregó a un lenguaje el soporte de objetos. Estos viven en un archivo aparte que usamos como una interfaz. Como un acuerdo. Si tenemos un header, podemos importar la libreria compilada. 
+```
+// math.h
+float add(float a, float b);
+```
+
+```
+// math.cpp
+#include "math.h"
+
+float add(float a, float b)
+{
+  return (a + b);
+}
+```
+
+```
+// CMakeLists.txt
+
+add_library(math math.cpp)
+```
+
+- En el makefile de nuestro programa principal, podemos debemos decirle que linkee la libreria
+```
+cmake_minimum_required(VERSION 3.23)
+
+project(SampleP VERSION 1.0)
+
+add_executable(SampleE src/main.cpp)
+
+add_subdirectory(src/Math)
+
+target_include_directories(SampleE PUBLIC src/Math)
+
+target_link_directories(SampleE PRIVATE src/Math)
+
+target_link_libraries(SampleE math
+```
+
+```
+#include <iostream>	
+#include <math.h>
+
+// #include "Math/math.h"
+// #include "math.cpp"
+// float add(float a, float b);
+
+int main(int argc, const char * argv[]) {
+    std::cout << "Hello World!" << std::endl;
+    std::cout << add(1.1f, 2.2f) << std::endl;
+    return 0;
+} 
+```
+
+- Como podemos usar librerias externas?
+- En la clase pasada les mencione que habian ya muchas librerias open source que podemos usar. Esta es una manera en la que las podemos usar. 
+- Digamos por ejemplo, glfw. 
+
+- https://github.com/glfw/glfw.git
+
+```
+$ git init
+...
+$ mkdir external
+$ git submodule add https://github.com/glfw/glfw.git external
+```
+
+```
+cmake_minimum_required(VERSION 3.23)
+
+project(SampleP VERSION 1.0)
+
+add_executable(SampleE src/main.cpp)
+
+add_subdirectory(src/Math)
+add_subdirectory(external/glfw)
+
+target_include_directories(SampleE
+  PUBLIC src/Math
+  PUBLIC external/glfw/src
+)
+
+target_link_directories(SampleE
+  PRIVATE src/Math
+  PRIVATE external/glfw/src
+)
+
+target_link_libraries(SampleE
+  math
+  glfw
+)
+```
+
+- Ejemplo de options
+
+```
+// En el CMake de glfw
+option(GLFW_BUILD_DOCS "Build the GLFW documentation" ON)
+```
+```
+// configure.sh
+
+#! /bin/sh
+cmake -DGLFW_BUILD_DOCS=OFF -S . -B build
+```
+```
+git submodule update --recursive
+```
+## references
+// https://www.haroldserrano.com/blog/understanding-references-in-c
+
+http://gamecodeschool.com/c-plus-plus/controlling-game-memory-with-c-pointers/
+
+A reference is a name constant for an address. You need to initialise the reference during declaration. int & iRef; // Error: ‘iRef’ declared as reference but not initialised.
+Once a reference is established to a variable, you cannot change the reference to reference another variable.
+To get the value pointed to by a pointer, you need to use the dereferencing operator  (e.g., if pNumber is a int pointer, pNumber returns the value pointed to by pNumber. It is called dereferencing or indirection). To assign an address of a variable into a pointer, you need to use the address-of operator & (e.g., pNumber = &number).
+On the other hand, referencing and dereferencing are done on the references implicitly. For example, if refNumber is a reference (alias) to another int variable, refNumber returns the value of the variable. No explicit dereferencing operator * should be used. Furthermore, to assign an address of a variable to a reference variable, no address-of operator & is needed.
+
+// references in parameters
+
+In pass-by-value, a clone is made and passed into the function. The caller’s copy cannot be modified.
+In pass-by-reference, a pointer is passed into the function. The caller’s copy could be modified inside the function.
+In pass-by-reference with reference arguments, you use the variable name as the argument.
+In pass-by-reference with pointer arguments, you need to use &varName (an address) as the argument.
+
+A quick analogy about pointers. If a variable is a house and its contents are the value it holds, then a pointer is the address of the house. Using this analogy, when we pass values to or return values from a function, we are actually making a new house the exact same as the previous one (except when we use a reference).
+
+## SDL
+
+
+install 
+libsdl2dev
+
+https://lazyfoo.net/tutorials/SDL/01_hello_SDL/index2.php
+
+game loop
+
+while game is running
+
+we handle user input
+
+update all objects
+
+render changes to display
+
+// now we will be using SDL image
+
+add   SDL2_image to target libraries
+
+https://lazyfoo.net/tutorials/SDL/02_getting_an_image_on_the_screen/index.php#:~:text=An%20SDL%20surface%20is%20just,it%20the%20easy%20way%20first.
+
+An SDL surface is just an image data type that contains the pixels of an image along with all data needed to render it. SDL surfaces use software rendering which means it uses the CPU to render. It is possible to render hardware images but it's a bit more difficult so we're going to learn it the easy way first.
+
+add to init
+
+add to render
+
+  SDL_RenderClear(renderer);
+  SDL_RenderCopy(renderer, playerTex, NULL, NULL);
+  SDL_RenderPresent(renderer);
+
+
+  add rects to header
+
+
+  framerate
+  declare ints
+
+  FPS = 60
+  frameDelay = 1000 / FPS;
+
+  sdl delay just sleeps
+framedelay is how much we will sleep every iteration
+
+
