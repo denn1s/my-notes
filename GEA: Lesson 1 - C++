@@ -192,15 +192,91 @@ cmake -DGLFW_BUILD_DOCS=OFF -S . -B build
 ```
 git submodule update --recursive
 ```
-## references
-// https://www.haroldserrano.com/blog/understanding-references-in-c
 
-http://gamecodeschool.com/c-plus-plus/controlling-game-memory-with-c-pointers/
+## Direcciones en C++
+
+Para entender los punteros, necesitamos entender cómo guardan data las computadoras. Cuadno creamos una variable en nuestro programa, se le asigna algo de espacio en la memoria de la computadora. Este valor está guardado en en una dirección asignada. 
+
+Si queremos saber la dirección de memoria en la que está guardada la variable, podemos usar el operador de referencia:
+
+&
+
+```
+int x = 3;
+std::cout << &x << std::endl;
+```
+
+Podemos declarar punteros explicitamente, usando la sintaxis *
+```
+int x = 3;
+int* pX = &x;
+std::cout << pX << std::endl;
+```
+Ahora, lo que hace confuso el manejo de punteros en c++, es que existe un operador que se llama el operador de de-referecia que nos retorna el valor al que este numero en la memoria apunta:
+```
+int x = 3;
+int* pX = &x;
+std::cout << *pX << std::endl;
+```
+Como nos puede ayudar este conocimiento a mejorar nuestro codigo?
+
+```
+int score = 0;
+int hiScore = 10;
+ 
+// Declare 2 pointers to hold the addresses of ints
+int* pIntPointer1;
+int* pIntPointer2;
+ 
+// Initialize pIntPointer1 to hold the address of score
+pIntPointer1 = &score;
+ 
+// Initialize pIntPointer2 to hold the address of hiScore
+pIntPointer2 = &hiScore;
+ 
+// Add 10 to score directly
+score += 10;
+// Score now equals 10
+ 
+// Add 10 to score using pIntPointer1
+*pIntPointer1 += 10;
+// score now equals 20- A new high score
+ 
+// Assign the new hi score to hiScore using only pointers
+*pIntPointer2 = *pIntPointer1;
+// hiScore and score both equal 20
+```
+Sin embargo, estar moviendo direcciones de memoria y reusandolas, puede causar muchos problemas. 
+
+Segmentation Fault. 
+
+Entonces se creo un nuevo concepto, una referencia. 
 
 A reference is a name constant for an address. You need to initialise the reference during declaration. int & iRef; // Error: ‘iRef’ declared as reference but not initialised.
-Once a reference is established to a variable, you cannot change the reference to reference another variable.
-To get the value pointed to by a pointer, you need to use the dereferencing operator  (e.g., if pNumber is a int pointer, pNumber returns the value pointed to by pNumber. It is called dereferencing or indirection). To assign an address of a variable into a pointer, you need to use the address-of operator & (e.g., pNumber = &number).
-On the other hand, referencing and dereferencing are done on the references implicitly. For example, if refNumber is a reference (alias) to another int variable, refNumber returns the value of the variable. No explicit dereferencing operator * should be used. Furthermore, to assign an address of a variable to a reference variable, no address-of operator & is needed.
+
+You must initialize a reference to an existing object.
+Once initialized, it can not refer to a different object.
+You can not manipulate a reference as an independent entity. They are simply a different name for an existing object.
+
+```
+int x = 3;
+int* pX = &x;
+int& rX = x;
+x = 4;
+std::cout << rX << std::endl;
+```
+
+So, if a reference is simply another name for an existing object, why go through the trouble of using them?
+
+The answer is that references provide a simpler syntax than pointers. When using pointers, you need to deal with passing an address and dereferencing a pointer. With references, the compiler takes care of these details for you.
+
+```
+int add(int &a){
+    int b=a+1; //2. No need to dereference the variable being passed
+    a=5; //3. No need to use dereference when you modify the variable
+    return b;
+}
+```
 
 // references in parameters
 
