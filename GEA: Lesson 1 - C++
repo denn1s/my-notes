@@ -278,6 +278,20 @@ int add(int &a){
 }
 ```
 
+## Ejemplos de punteros:
+```
+int main() {
+	int *ip;
+	int arr[] = { 10, 34, 13, 76, 5, 46 };
+	ip = arr;
+	for (int x = 0; x < 6; x++) {
+		cout << *ip << endl;
+		ip++;
+	}
+	return 0;
+}
+```
+
 // references in parameters
 
 In pass-by-value, a clone is made and passed into the function. The caller’s copy cannot be modified.
@@ -286,6 +300,25 @@ In pass-by-reference with reference arguments, you use the variable name as the 
 In pass-by-reference with pointer arguments, you need to use &varName (an address) as the argument.
 
 A quick analogy about pointers. If a variable is a house and its contents are the value it holds, then a pointer is the address of the house. Using this analogy, when we pass values to or return values from a function, we are actually making a new house the exact same as the previous one (except when we use a reference).
+
+##
+Advantages of using Pointers
+Here, are pros/benefits of using Pointers
+
+Pointers are variables which store the address of other variables in C++.
+More than one variable can be modified and returned by function using pointers.
+Memory can be dynamically allocated and de-allocated using pointers.
+Pointers help in simplifying the complexity of the program.
+The execution speed of a program improves by using pointers.
+Summary:
+A pointer refers to a variable holding address of another variable.
+Each pointer has a valid data type.
+A pointer is a symbolic representation of a memory address.
+Pointers allow programs to simulate call-by-reference and create and manipulate dynamic data structures.
+Arrays and pointers use a related concept.
+The array name denotes the array’s base.
+If you want to assign the address of an array to a pointer, don’t use an ampersand (&).
+If there is no specific address to assign a pointer variable, assign it a NULL.
 
 ## SDL
 
